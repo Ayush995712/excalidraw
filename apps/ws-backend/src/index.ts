@@ -1,6 +1,11 @@
 import { WebSocketServer, WebSocket } from "ws";
+import jwt from "jsonwebtoken";
 
 const wss = new WebSocketServer({port: 8080});
+const jwt_password = process.env.JWT_PASSWORD;
+if (!jwt_password) {
+    throw new Error("JWT_PASSWORD is not configured");
+}
 
 type Room = {
     roomId: string;
@@ -9,7 +14,16 @@ type Room = {
 
 const rooms: Room[] = [];
 
-wss.on('connection', function connection(socket) {
+wss.on('connection', function connection(socket, request) {
+
+    let header = request.headers.authorization;
+
+    if (!header?.startsWith("Bearer")) {
+        return "Unauthorized";
+    };
+    const token = header.split("")[1];
+    if (!token) { return "Unauthorized" };
+    let decoded = jwt.verify(header as string, token);
 
     socket.on('message', (message) => {
         const data = JSON.parse(message.toString());

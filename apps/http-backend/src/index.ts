@@ -1,10 +1,14 @@
-import express from "express";
+import express, { response } from "express";
 import jwt from "jsonwebtoken";
+import "dotenv/config";
 
 const app = express();
 app.use(express.json());
 
-const jwt_password = "something";
+const jwt_password = process.env.JWT_PASSWORD;
+if (!jwt_password) {
+    throw new Error("JWT_PASSWORD is not configured");
+}
 
 type User = {
     username: string,
@@ -57,6 +61,22 @@ app.post("/api/signin", (req, res) => {
             "msg": "credentials are not valid"
         });
     };
+})
+
+app.post("/create-room", async (req, res) => {
+    const type = req.body.type;
+    const roomId = req.body.roomId;
+
+    await fetch("http://localhost:8080/create-room", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            type, roomId
+        })
+    })
+    
 })
 
 app.listen(3001);
