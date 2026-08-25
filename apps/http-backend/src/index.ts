@@ -79,4 +79,19 @@ app.post("/create-room", async (req, res) => {
     
 })
 
+app.post("/share-message", async (req, res) => {
+    const { type, roomId, msg } = req.body;
+
+    await fetch("http://localhost:8080/share-message", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            type, roomId, msg
+        })
+    })
+    
+})
+
 app.listen(3001);
