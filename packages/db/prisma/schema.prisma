@@ -1,5 +1,0 @@
-// use prisma-next
-
-model User {
-    user   String
-}

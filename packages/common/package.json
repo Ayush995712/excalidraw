@@ -1,6 +1,9 @@
 {
-  "name": "db",
+  "name": "@repo/common",
   "version": "1.0.0",
+  "exports": {
+    "./types": "./src/types.ts"
+  },
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -14,6 +17,6 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "prisma": "8.0.0-rc.12"
+    "zod": "^4.4.3"
   }
 }
