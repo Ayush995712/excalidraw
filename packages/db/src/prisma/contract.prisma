@@ -1,21 +1,31 @@
 // use prisma-next
 
 model User {
-  id        Int      @id @default(autoincrement())
+  id        String      @id @default(uuid())
   email     String   @unique
-  username  String?
-  name      String?
-  posts     Post[]
-  createdAt TimestamptzString @default(now())
-  updatedAt temporal.updatedAtString()
+  password  String
+  name      String
+  photo     String
+  rooms     Room[]
+  chats     Chat[]
 }
 
-model Post {
+model Room {
   id        Int      @id @default(autoincrement())
-  title     String
-  content   String?
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  Int
-  createdAt TimestamptzString @default(now())
-  updatedAt temporal.updatedAtString()
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  adminId   String
+
+  admin     User     @relation(fields: [adminId], references: [id])
+  chats     Chat[]
+}
+
+model Chat {
+  id        Int       @id  @default(autoincrement())
+  roomId    Int
+  message   String
+  userId    String 
+
+  room       Room     @relation(fields: [roomId], references: [id])
+  user       User      @relation(fields: [userId], references: [id])
 }
