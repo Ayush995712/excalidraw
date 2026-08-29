@@ -1,4 +1,5 @@
 import { WebSocketServer, WebSocket } from "ws";
+import { connectDb, db } from "@repo/db/client";
 import jwt from "jsonwebtoken";
 
 const wss = new WebSocketServer({port: 8080});
@@ -6,6 +7,12 @@ const jwt_password = process.env.JWT_PASSWORD;
 if (!jwt_password) {
     throw new Error("JWT_PASSWORD is not configured");
 }
+
+async function main() {
+    await connectDb();
+}
+
+main();
 
 type Room = {
     roomId: string;

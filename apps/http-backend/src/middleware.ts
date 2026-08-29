@@ -20,11 +20,11 @@ export function userMiddleware(req: Request, res: Response, next: NextFunction) 
     try {
         const decoded = jwt.verify(token, jwt_password)
 
-        if (typeof decoded === "string" || !decoded.name) {
+        if (typeof decoded === "string" || !decoded.id) {
             return res.status(401).json({ message: "Invalid token" });
         };
 
-        req.userId = decoded.name;
+        req.userId = decoded.id;
         next();
         } catch {
             return res.status(401).json({ message: "Invalid or expired token" });

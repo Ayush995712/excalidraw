@@ -2,6 +2,7 @@ import express, { response } from "express";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
 import { SigninSchema } from "@repo/common/types";
+import { connectDb, db } from "@repo/db/client";
 
 const app = express();
 app.use(express.json());
@@ -18,39 +19,46 @@ type User = {
 
 let users: User[] = [];
 
-app.post("/api/signup", (req, res) => {
-    const { username, password } = req.body;
-    if (!username || !password) {
+app.post("/api/signup", async (req, res) => {
+    const { email, password, name } = req.body;
+    if (!email || !password || !name) {
         return res.json({
-            msg: "username and password required"
+            msg: "email, name and password required"
         });
     }
-    for(const user of users) {
-        if(user === username) {
-            return res.json({
-                msg: "Username already taken"
-            })
-        }
+
+    const existing_user = await db.orm.public.User.where({email: email}).first();
+    if (existing_user) {
+        return res.json({
+            msg: "email already exists"
+        })
     }
-    users.push({username, password});
-    return res.json({
-        msg: "user created"
-    });
+
+    try {
+        await db.orm.public.User.create({email, password, name})
+        return res.json({
+            msg: "user created"
+        })
+    } catch (error) {
+       return res.json({
+        error
+       }) 
+    }
 });
 
-app.post("/api/signin", (req, res) => {
-    const { username, password } = req.body;
-    if (!username || !password ) {
+app.post("/api/signin", async (req, res) => {
+    const { email, password } = req.body;
+    if (!email || !password ) {
         return res.json({
-            "msg": "username and password are required"
+            "msg": "email and password are required"
         });
     };
 
-    const existing_user = users.find((user) => user.username === username && user.password === password);
+    const existing_user = await db.orm.public.User.where({email, password}).first();
     
     if(existing_user) {
         const token = jwt.sign({
-            name: existing_user.username
+            id: existing_user.id
         }, jwt_password);
 
         res.json({
@@ -95,4 +103,10 @@ app.post("/share-message", async (req, res) => {
     
 })
 
-app.listen(3001);
+async function main() {
+  await connectDb();
+
+  app.listen(3001);
+}
+
+main();
