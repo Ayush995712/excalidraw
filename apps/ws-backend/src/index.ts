@@ -26,12 +26,22 @@ wss.on('connection', function connection(socket, request) {
 
     let header = request.headers.authorization;
 
-    if (!header?.startsWith("Bearer")) {
-        return "Unauthorized";
-    };
-    const token = header.split("")[1];
-    if (!token) { return "Unauthorized" };
-    let decoded = jwt.verify(header as string, token);
+    if (!header?.startsWith("Bearer ")) {
+        socket.close(1008, "Unauthorized");
+        return;
+    }
+    const token = header.split(" ")[1];
+    if (!token) { 
+        socket.close(1008, "Unauthorized");
+        return "Unauthorized" };
+
+    let decoded;
+    try {
+        decoded = jwt.verify(token, jwtSecret);
+    } catch {
+        socket.close(1008, "Invalid or expired token");
+        return;
+    }
 
     socket.on('message', (message) => {
         const data = JSON.parse(message.toString());

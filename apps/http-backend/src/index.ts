@@ -58,7 +58,7 @@ app.post("/api/signin", async (req, res) => {
     try {
         const existingUser = await db.orm!.public!.User!.where({email}).first();
         const hashToCheck = existingUser?.password;
-        const isValid = bcrypt.compare(password, hashToCheck as string);
+        const isValid = await bcrypt.compare(password, hashToCheck as string);
     
         if (!existingUser || !isValid) {
             return res.status(401).json({ msg: "Invalid credentials" });
@@ -92,7 +92,10 @@ app.post("/create-room", userMiddleware, async (req, res) => {
             roomId: room.slug
         })
     } catch (err) {
-        return res.status(411).json({ err });
+        return res.status(411).json({
+                msg: "Room creation failed",
+                err 
+            });
     }
     
 })
