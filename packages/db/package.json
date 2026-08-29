@@ -2,13 +2,18 @@
   "name": "@repo/db",
   "version": "1.0.0",
   "exports": {
-    "./client": "./src/index.ts"
+    "./client": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   },
   "description": "",
-  "main": "index.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "contract:emit": "prisma contract emit"
+    "contract:emit": "prisma contract emit",
+    "build": "npm run contract:emit && tsc -b && node -e \"require('fs').cpSync('src/prisma/contract.json', 'dist/prisma/contract.json')\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
     "@prisma/cli-engine": "0.2.3",

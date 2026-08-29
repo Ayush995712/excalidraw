@@ -1,11 +1,12 @@
 import { WebSocketServer, WebSocket } from "ws";
 import { connectDb, db } from "@repo/db/client";
+import "dotenv/config"
 import jwt from "jsonwebtoken";
 
 const wss = new WebSocketServer({port: 8080});
-const jwt_password = process.env.JWT_PASSWORD;
-if (!jwt_password) {
-    throw new Error("JWT_PASSWORD is not configured");
+const jwtSecret = process.env.JWT_SECRET;
+if (!jwtSecret) {
+    throw new Error("jwtSecret is not configured");
 }
 
 async function main() {

@@ -26,7 +26,7 @@ app.post("/api/signup", async (req, res) => {
     const { email, password, name } = parsedData.data;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    const existingUser = await db.orm.public.User.where({email}).first();
+    const existingUser = await db.orm!.public!.User!.where({email}).first();
     if (existingUser) {
         return res.json({
             msg: "email already exists"
@@ -34,7 +34,7 @@ app.post("/api/signup", async (req, res) => {
     }
 
     try {
-        await db.orm.public.User.create({email, password: hashedPassword, name})
+        await db.orm!.public!.User!.create({email, password: hashedPassword, name})
         return res.json({
             msg: "user created"
         })
@@ -56,7 +56,7 @@ app.post("/api/signin", async (req, res) => {
     const { email, password } = parsedData.data;
 
     try {
-        const existingUser = await db.orm.public.User.where({email}).first();
+        const existingUser = await db.orm!.public!.User!.where({email}).first();
         const hashToCheck = existingUser?.password;
         const isValid = bcrypt.compare(password, hashToCheck as string);
     
@@ -84,14 +84,15 @@ app.post("/create-room", userMiddleware, async (req, res) => {
     const userId = req.userId;
 
     try {
-        const room = await db.orm.public.Room.create({
+        const room = await db.orm!.public!.Room!.create({
             slug: parsedData.data?.name, adminId: userId
         });
         return res.status(200).json({
-            msg: "Room created"
+            msg: "Room created",
+            roomId: room.slug
         })
     } catch (err) {
-        return res.json({ err });
+        return res.status(411).json({ err });
     }
     
 })

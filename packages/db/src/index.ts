@@ -1,3 +1,4 @@
+import "dotenv/config"
 import { db } from "./prisma/db";
 
 let connected = false;
