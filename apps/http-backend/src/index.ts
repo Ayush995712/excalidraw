@@ -1,41 +1,40 @@
-import express, { response } from "express";
+import express from "express";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
-import { SigninSchema } from "@repo/common/types";
+import bcrypt from "bcrypt";
 import { connectDb, db } from "@repo/db/client";
+import { SigninSchema, CreateUserSchema, CreateRoomSchema } from "@repo/common/types";
+import { userMiddleware } from "./middleware";
 
+const saltRounds = 10;
 const app = express();
 app.use(express.json());
 
-const jwt_password = process.env.JWT_PASSWORD;
-if (!jwt_password) {
-    throw new Error("JWT_PASSWORD is not configured");
+const jwtSecret = process.env.JWT_SECRET;
+if (!jwtSecret) {
+    throw new Error("jwtSecret is not configured");
 }
 
-type User = {
-    username: string,
-    password: string
-};
-
-let users: User[] = [];
-
 app.post("/api/signup", async (req, res) => {
-    const { email, password, name } = req.body;
-    if (!email || !password || !name) {
-        return res.json({
-            msg: "email, name and password required"
-        });
+    const parsedData = CreateUserSchema.safeParse(req.body);
+    if (!parsedData.success) {
+        return res.status(400).json({
+            error: parsedData.error.issues
+        })
     }
 
-    const existing_user = await db.orm.public.User.where({email: email}).first();
-    if (existing_user) {
+    const { email, password, name } = parsedData.data;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    const existingUser = await db.orm.public.User.where({email}).first();
+    if (existingUser) {
         return res.json({
             msg: "email already exists"
         })
     }
 
     try {
-        await db.orm.public.User.create({email, password, name})
+        await db.orm.public.User.create({email, password: hashedPassword, name})
         return res.json({
             msg: "user created"
         })
@@ -47,44 +46,53 @@ app.post("/api/signup", async (req, res) => {
 });
 
 app.post("/api/signin", async (req, res) => {
-    const { email, password } = req.body;
-    if (!email || !password ) {
-        return res.json({
-            "msg": "email and password are required"
-        });
+    const parsedData = SigninSchema.safeParse(req.body);
+    if (!parsedData.success) {
+        return res.status(400).json({
+            error: parsedData.error.issues
+        })
     };
 
-    const existing_user = await db.orm.public.User.where({email, password}).first();
+    const { email, password } = parsedData.data;
+
+    try {
+        const existingUser = await db.orm.public.User.where({email}).first();
+        const hashToCheck = existingUser?.password;
+        const isValid = bcrypt.compare(password, hashToCheck as string);
     
-    if(existing_user) {
-        const token = jwt.sign({
-            id: existing_user.id
-        }, jwt_password);
+        if (!existingUser || !isValid) {
+            return res.status(401).json({ msg: "Invalid credentials" });
+        }
 
-        res.json({
-            token
-        });
-
-    } else {
-        res.json({
-            "msg": "credentials are not valid"
-        });
-    };
+        const token = jwt.sign(
+            { id: existingUser.id }, jwtSecret, { expiresIn: "7d" }
+        );
+        return res.json({ token });
+    } catch (error) {
+        console.error("Signin error:", error);
+        return res.status(500).json({ msg: "Something went wrong" });
+    }
 })
 
-app.post("/create-room", async (req, res) => {
-    const type = req.body.type;
-    const roomId = req.body.roomId;
-
-    await fetch("http://localhost:8080/create-room", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            type, roomId
+app.post("/create-room", userMiddleware, async (req, res) => {
+    const parsedData = CreateRoomSchema.safeParse(req.body);
+    if (!parsedData.success) {
+        return res.status(400).json({
+            error: parsedData.error.issues
         })
-    })
+    };
+    const userId = req.userId;
+
+    try {
+        const room = await db.orm.public.Room.create({
+            slug: parsedData.data?.name, adminId: userId
+        });
+        return res.status(200).json({
+            msg: "Room created"
+        })
+    } catch (err) {
+        return res.json({ err });
+    }
     
 })
 

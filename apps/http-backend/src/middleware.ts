@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
-const jwt_password = process.env.JWT_PASSWORD!;
-if (!jwt_password) {
-    throw new Error("JWT_PASSWORD is not configured");
+const jwtSecret = process.env.JWT_SECRET!;
+if (!jwtSecret) {
+    throw new Error("jwtSecret is not configured");
 };
 
 export function userMiddleware(req: Request, res: Response, next: NextFunction) {
@@ -18,7 +18,7 @@ export function userMiddleware(req: Request, res: Response, next: NextFunction) 
     }
 
     try {
-        const decoded = jwt.verify(token, jwt_password)
+        const decoded = jwt.verify(token, jwtSecret)
 
         if (typeof decoded === "string" || !decoded.id) {
             return res.status(401).json({ message: "Invalid token" });
