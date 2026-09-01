@@ -1,7 +1,6 @@
 import { WebSocketServer, WebSocket } from "ws";
 import { connectDb, db } from "@repo/db/client";
 import "dotenv/config"
-import jwt from "jsonwebtoken";
 import { checkAuth, extractToken } from "./middleware";
 
 const wss = new WebSocketServer({port: 8080});
