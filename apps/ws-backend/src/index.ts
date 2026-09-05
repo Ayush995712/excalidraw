@@ -1,5 +1,5 @@
 import { WebSocketServer, WebSocket } from "ws";
-import { connectDb, db } from "@repo/db/client";
+import { db } from "@repo/db";
 import "dotenv/config"
 import { checkAuth, extractToken } from "./middleware";
 
@@ -101,9 +101,3 @@ function removeClient (ws: WebSocket) {
         )
     };
 };
-
-async function main() {
-    await connectDb();
-}
-
-main();

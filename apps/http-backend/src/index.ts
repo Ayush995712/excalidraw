@@ -2,7 +2,7 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
 import bcrypt from "bcrypt";
-import { connectDb, db } from "@repo/db/client";
+import { connectDb, db } from "@repo/db";
 import { SigninSchema, CreateUserSchema, CreateRoomSchema } from "@repo/common/types";
 import { userMiddleware } from "./middleware";
 

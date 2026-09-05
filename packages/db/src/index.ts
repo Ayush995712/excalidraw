@@ -1,14 +1,4 @@
-import "dotenv/config"
-import { db } from "./prisma/db";
+// packages/db/src/index.ts
+import { PrismaClient } from "@prisma/client";
 
-let connected = false;
-
-export async function connectDb() {
-  if (!connected) {
-    await db.connect({ url: process.env.DATABASE_URL! });
-    connected = true;
-  }
-  return db;
-}
-
-export { db };
+export const db = new PrismaClient();

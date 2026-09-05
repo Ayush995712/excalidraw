@@ -1,4 +1,18 @@
-// use prisma-next
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
 
 model User {
   id            String            @id @default(uuid())
@@ -15,7 +29,7 @@ model User {
 model Room {
   id          Int                 @id @default(autoincrement())
   slug        String              @unique
-  createdAt   TimestamptzString   @default(now())
+  createdAt   DateTime            @default(now())
   adminId     String
 
   admin       User                @relation("RoomAdmin", fields: [adminId], references: [id])
@@ -27,7 +41,7 @@ model RoomMember {
   id          Int                @id @default(autoincrement())
   userId      String
   roomId      Int
-  joinedAt    TimestamptzString  @default(now())
+  joinedAt    DateTime           @default(now())
 
   room        Room               @relation(fields: [roomId], references: [id])
   user        User               @relation(fields: [userId], references: [id])
@@ -35,12 +49,12 @@ model RoomMember {
 }
 
 model Chat {
-  id        Int       @id  @default(autoincrement())
+  id        Int         @id  @default(autoincrement())
   roomId    Int
   message   String
   userId    String
-  createdAt TimestamptzString @default(now()) 
+  createdAt DateTime    @default(now()) 
 
-  room       Room     @relation(fields: [roomId], references: [id])
-  user       User      @relation(fields: [userId], references: [id])
-}
+  room       Room       @relation(fields: [roomId], references: [id])
+  user       User       @relation(fields: [userId], references: [id])
+} 
