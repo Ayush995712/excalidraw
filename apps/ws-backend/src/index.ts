@@ -9,12 +9,6 @@ if (!jwtSecret) {
     throw new Error("jwtSecret is not configured");
 }
 
-async function main() {
-    await connectDb();
-}
-
-main();
-
 type Room = {
     roomId: string;
     clients: WebSocket[];
@@ -40,7 +34,7 @@ wss.on('connection', function connection(socket, request) {
         const data = JSON.parse(message.toString());
 
         if (data.type === "join" ) {
-            joinRoom(data.roomId, socket);
+            joinRoom(data.roomId, socket, userId);
         }
 
         if (data.type === "chat") {
@@ -55,18 +49,33 @@ wss.on('connection', function connection(socket, request) {
 
 });
 
-async function joinRoom (roomId: string, ws: WebSocket) {
+async function joinRoom (roomId: string, ws: WebSocket, userId: string) {
     let room = rooms.find((room) => room.roomId === roomId);
     if (!room) {
-        return;
+        const dbRoom = await db.orm.public!.Room!.where({ slug: roomId}).first();
+        if (!dbRoom) {
+            ws.close(1008, "Room not found");
+            return;
+        };
+        room = {roomId, clients: []};
+        rooms.push(room);
     };
 
+    room.clients.push(ws);
+
     try {
-        room.clients.push(ws);
-        
+        const dbRoom = await db.orm.public!.Room!.where({ slug: roomId}).first();
+        if (!dbRoom) {
+            ws.close(1008, "Room not found");
+            return;
+        };
+        await db.orm.public!.roomMember!.upsert({
+            update: {},
+            create: { roomId: dbRoom.id, userId }
+        });
         return;
     } catch (e) {
-        
+        console.error("Failed to persist room membership:", e);
     }
 };
 
@@ -92,3 +101,9 @@ function removeClient (ws: WebSocket) {
         )
     };
 };
+
+async function main() {
+    await connectDb();
+}
+
+main();
