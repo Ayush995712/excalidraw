@@ -24,7 +24,8 @@ model Chat {
   id        Int       @id  @default(autoincrement())
   roomId    Int
   message   String
-  userId    String 
+  userId    String
+  createdAt TimestamptzString @default(now()) 
 
   room       Room     @relation(fields: [roomId], references: [id])
   user       User      @relation(fields: [userId], references: [id])

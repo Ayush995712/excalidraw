@@ -23,6 +23,13 @@
         "models": {
           "Chat": {
             "fields": {
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
               "id": {
                 "nullable": false,
                 "type": {
@@ -86,6 +93,9 @@
             },
             "storage": {
               "fields": {
+                "createdAt": {
+                  "column": "createdAt"
+                },
                 "id": {
                   "column": "id"
                 },
@@ -288,6 +298,15 @@
           "table": {
             "chat": {
               "columns": {
+                "createdAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
                 "id": {
                   "codecId": "pg/int4@1",
                   "default": {
@@ -493,7 +512,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "2f29e71aaf5d461fbf1af25b08ad030da18f90dfddb1f4188233f603a58c98da"
+    "storageHash": "d20ae2345bfa47783794a359c68d63c8673344dc97fdc1c5a3abf4bc41dd65d2"
   },
   "execution": {
     "executionHash": "c6c68895811eac8510a3105769605e248431b77d0f5294ccf29b9aa8ce355232",
