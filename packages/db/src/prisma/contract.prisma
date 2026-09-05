@@ -1,23 +1,37 @@
 // use prisma-next
 
 model User {
-  id        String      @id @default(uuid())
-  email     String      @unique
-  password  String
-  name      String
-  photo     String?
-  rooms     Room[]
-  chats     Chat[]
+  id            String            @id @default(uuid())
+  email         String            @unique
+  password      String
+  name          String
+  photo         String?
+
+  chats         Chat[]
+  adminRooms    Room[]            @relation("RoomAdmin")
+  memberships   RoomMember[]
 }
 
 model Room {
-  id        Int      @id @default(autoincrement())
-  slug      String   @unique
-  createdAt TimestamptzString @default(now())
-  adminId   String
+  id          Int                 @id @default(autoincrement())
+  slug        String              @unique
+  createdAt   TimestamptzString   @default(now())
+  adminId     String
 
-  admin     User     @relation(fields: [adminId], references: [id])
-  chats     Chat[]
+  admin       User                @relation("RoomAdmin", fields: [adminId], references: [id])
+  chats       Chat[]
+  members     RoomMember[]
+}
+
+model RoomMember {
+  id          Int                @id @default(autoincrement())
+  userId      String
+  roomId      Int
+  joinedAt    TimestamptzString  @default(now())
+
+  room        Room               @relation(fields: [roomId], references: [id])
+  user        User               @relation(fields: [userId], references: [id])
+  @@unique([roomId, userId])
 }
 
 model Chat {

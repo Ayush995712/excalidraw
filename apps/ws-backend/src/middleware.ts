@@ -5,7 +5,7 @@ export function extractToken(header: string | undefined): string | undefined {
         return undefined;
     };
 
-    const token = header?.split(" ")[1];
+    const token = header.split(" ")[1];
     if (!token) {
         return undefined;
     };
@@ -19,12 +19,11 @@ interface AuthResult {
 }
 
 export function checkAuth(token: string, jwtSecret: string): AuthResult {
-    if (!token) { return { valid : false }};
 
     try {
         let decoded = jwt.verify(token, jwtSecret);
 
-        if (typeof decoded === "string" || !decoded?.userId) {
+        if (typeof decoded === "string" || !decoded.userId) {
             return { valid: false }
         };
 

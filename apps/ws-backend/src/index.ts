@@ -1,5 +1,5 @@
 import { WebSocketServer, WebSocket } from "ws";
-import { connectDb } from "@repo/db/client";
+import { connectDb, db } from "@repo/db/client";
 import "dotenv/config"
 import { checkAuth, extractToken } from "./middleware";
 
@@ -55,14 +55,19 @@ wss.on('connection', function connection(socket, request) {
 
 });
 
-function joinRoom (roomId: string, ws: WebSocket) {
+async function joinRoom (roomId: string, ws: WebSocket) {
     let room = rooms.find((room) => room.roomId === roomId);
-
     if (!room) {
-        room = { roomId, clients: []};
-        rooms.push(room);
+        return;
+    };
+
+    try {
+        room.clients.push(ws);
+        
+        return;
+    } catch (e) {
+        
     }
-    room.clients.push(ws);
 };
 
 function chatRoom (roomId: string, ws: WebSocket, message: string) {
