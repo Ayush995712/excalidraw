@@ -159,6 +159,9 @@ importers:
         specifier: ^17.4.2
         version: 17.4.2
     devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
       prisma:
         specifier: '6'
         version: 6.19.3(magicast@0.5.4)(typescript@7.0.2)

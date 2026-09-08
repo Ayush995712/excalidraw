@@ -2,7 +2,7 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
 import bcrypt from "bcrypt";
-import { connectDb, db } from "@repo/db";
+import { db } from "@repo/db/client";
 import { SigninSchema, CreateUserSchema, CreateRoomSchema } from "@repo/common/types";
 import { userMiddleware } from "./middleware";
 
@@ -115,10 +115,4 @@ app.post("/share-message", async (req, res) => {
     
 })
 
-async function main() {
-  await connectDb();
-
-  app.listen(3001);
-}
-
-main();
+app.listen(3001);

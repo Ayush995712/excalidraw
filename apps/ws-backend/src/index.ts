@@ -1,5 +1,5 @@
 import { WebSocketServer, WebSocket } from "ws";
-import { db } from "@repo/db";
+import { db } from "@repo/db/client";
 import "dotenv/config"
 import { checkAuth, extractToken } from "./middleware";
 
