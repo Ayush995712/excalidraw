@@ -52,7 +52,7 @@ wss.on('connection', function connection(socket, request) {
 async function joinRoom (roomId: string, ws: WebSocket, userId: string) {
     let room = rooms.find((room) => room.roomId === roomId);
     if (!room) {
-        const dbRoom = await db.orm.public!.Room!.where({ slug: roomId}).first();
+        const dbRoom = await db.Room.find({slug: roomId});
         if (!dbRoom) {
             ws.close(1008, "Room not found");
             return;
@@ -64,12 +64,12 @@ async function joinRoom (roomId: string, ws: WebSocket, userId: string) {
     room.clients.push(ws);
 
     try {
-        const dbRoom = await db.orm.public!.Room!.where({ slug: roomId}).first();
+        const dbRoom = await db.Room.find({ slug: roomId});
         if (!dbRoom) {
             ws.close(1008, "Room not found");
             return;
         };
-        await db.orm.public!.roomMember!.upsert({
+        await db.roomMember.upsert({
             update: {},
             create: { roomId: dbRoom.id, userId }
         });
