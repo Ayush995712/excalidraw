@@ -16,6 +16,7 @@ if (!jwtSecret) {
 }
 
 app.post("/api/signup", async (req, res) => {
+
     const parsedData = CreateUserSchema.safeParse(req.body);
     if (!parsedData.success) {
         return res.status(400).json({
@@ -34,12 +35,13 @@ app.post("/api/signup", async (req, res) => {
     }
 
     try {
-        await db.user.create({email, password: hashedPassword, name})
+        const user = await db.user.create({email, password: hashedPassword, name})
         return res.json({
-            msg: "user created"
+            msg: "user created",
+            userId: user.id
         })
     } catch (error) {
-       return res.json({
+       return res.status(411).json({
         error
        }) 
     }
